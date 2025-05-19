@@ -1,0 +1,24 @@
+{
+  "name": "code-challenge-interval-merging",
+  "version": "1.0.0",
+  "author": { 
+    "name": "Will Webster", 
+    "email": "willdwebster@gmail.com"
+  },
+  "license": "MIT",
+  "description": "Project for an interval merging code challenge",
+  "engines":{
+    "node": "22.15.1"
+  },
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ascianous/code_challenge-interval_merging.git"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "typescript": "5.8.3"
+  }
+}
