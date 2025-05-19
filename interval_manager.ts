@@ -25,9 +25,10 @@ export class IntervalManager {
     // - run interval validation
     // - run interval merge
     public addInterval(interval: [number, number]):void{
+        if(!this.isIntervalValid(interval)) throw Error;
         this._queuedAddIntervals.push(interval);
         if(this._queuedAddIntervals.length == 1){
-            this.mergeIntervals();
+            this.runAddQueue();
         }
         return;
     }
@@ -44,11 +45,18 @@ export class IntervalManager {
         return this._currentIntervalSet;
     }
 
+    private runAddQueue(): void{
+        this.mergeIntervals();
+        this._queuedAddIntervals.shift();
+        if(this._queuedAddIntervals.length>0) return this.runAddQueue();
+        return;
+    }
+
     // Tests for urrent validatity criteria on interval
     // - valid integer in each position
     // - integers in ascending order
     private isIntervalValid(interval: [number, number]):boolean{
-
+        if(!isNaN(interval[0]) && !isNaN(interval[1]) && interval[0] < interval[1]) return true;
         return false;
     }
 
@@ -62,8 +70,6 @@ export class IntervalManager {
         // Case 1 - Test if our interval is below the current lowest
         if(this._currentIntervalSet.length==0 || intervalToMerge[1] < this._currentIntervalSet[0]![0]){
             this._currentIntervalSet.unshift(intervalToMerge);
-            this._queuedAddIntervals.shift();
-            if(this._currentIntervalSet.length>0) return this.mergeIntervals();
             return;
         }
 
@@ -94,8 +100,6 @@ export class IntervalManager {
             }
             ++cIdx;
         }
-        this._queuedAddIntervals.shift();
-        if(this._currentIntervalSet.length>0) return this.mergeIntervals();
         return;
     }
 

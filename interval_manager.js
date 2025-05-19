@@ -1,4 +1,3 @@
-"use strict";
 /**
  * Class definition for an Interval Manager
  * - Stores the current set of intervals
@@ -7,9 +6,7 @@
  * - Public functions to initiate adding a new interval, removing an interval
  * and retrieving the current set of intervals
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.IntervalManager = void 0;
-class IntervalManager {
+export class IntervalManager {
     // Hold our current set of intervals
     _currentIntervalSet;
     // Hold our currently queued intervals. If this has 1 or more entries, 
@@ -24,9 +21,11 @@ class IntervalManager {
     // - run interval validation
     // - run interval merge
     addInterval(interval) {
+        if (!this.isIntervalValid(interval))
+            throw Error;
         this._queuedAddIntervals.push(interval);
         if (this._queuedAddIntervals.length == 1) {
-            this.mergeIntervals();
+            this.runAddQueue();
         }
         return;
     }
@@ -39,10 +38,19 @@ class IntervalManager {
     getIntervals() {
         return this._currentIntervalSet;
     }
+    runAddQueue() {
+        this.mergeIntervals();
+        this._queuedAddIntervals.shift();
+        if (this._queuedAddIntervals.length > 0)
+            return this.runAddQueue();
+        return;
+    }
     // Tests for urrent validatity criteria on interval
     // - valid integer in each position
     // - integers in ascending order
     isIntervalValid(interval) {
+        if (!isNaN(interval[0]) && !isNaN(interval[1]) && interval[0] < interval[1])
+            return true;
         return false;
     }
     // Retrieve an interval from the front of the add queue
@@ -55,9 +63,6 @@ class IntervalManager {
         // Case 1 - Test if our interval is below the current lowest
         if (this._currentIntervalSet.length == 0 || intervalToMerge[1] < this._currentIntervalSet[0][0]) {
             this._currentIntervalSet.unshift(intervalToMerge);
-            this._queuedAddIntervals.shift();
-            if (this._currentIntervalSet.length > 0)
-                return this.mergeIntervals();
             return;
         }
         // Current index
@@ -94,9 +99,6 @@ class IntervalManager {
             }
             ++cIdx;
         }
-        this._queuedAddIntervals.shift();
-        if (this._currentIntervalSet.length > 0)
-            return this.mergeIntervals();
         return;
     }
     // Helper function for determining if a value is within a range
@@ -110,4 +112,3 @@ class IntervalManager {
     demergeIntervals() {
     }
 }
-exports.IntervalManager = IntervalManager;
