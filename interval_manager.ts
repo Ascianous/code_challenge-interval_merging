@@ -7,7 +7,7 @@
  * and retrieving the current set of intervals
  */
 
-class IntervalManager {
+export class IntervalManager {
     // Hold our current set of intervals
     private _currentIntervalSet: [number, number][];
     
@@ -25,7 +25,11 @@ class IntervalManager {
     // - run interval validation
     // - run interval merge
     public addInterval(interval: [number, number]):void{
-        
+        this._queuedAddIntervals.push(interval);
+        if(this._queuedAddIntervals.length == 1){
+            this.mergeIntervals();
+        }
+        return;
     }
 
     // remove the passed interval from the set
@@ -50,8 +54,55 @@ class IntervalManager {
 
     // Retrieve an interval from the front of the add queue
     // and merge it with the existing set
-    private mergeIntervals(){
+    private mergeIntervals(): void{
+        const intervalToMerge: [number, number] | undefined = this._queuedAddIntervals[0];
+        if(!intervalToMerge) return;
+        
+        // Case 0 - our interval set is empty
+        // Case 1 - Test if our interval is below the current lowest
+        if(this._currentIntervalSet.length==0 || intervalToMerge[1] < this._currentIntervalSet[0]![0]){
+            this._currentIntervalSet.unshift(intervalToMerge);
+            this._queuedAddIntervals.shift();
+            if(this._currentIntervalSet.length>0) return this.mergeIntervals();
+            return;
+        }
 
+        // Current index
+        let cIdx = 0;
+        let haveMergedNewInterval = false;
+        while(cIdx < this._currentIntervalSet.length){
+            const currentInterval = this._currentIntervalSet[cIdx];
+            if(!currentInterval) throw Error;
+            if(!haveMergedNewInterval){
+                if(this.inRange(currentInterval[0], intervalToMerge[0], intervalToMerge[1]) || this.inRange(currentInterval[1], intervalToMerge[0], intervalToMerge[1])){
+                    this._currentIntervalSet[cIdx] = [Math.min(currentInterval[0], intervalToMerge[0]), Math.max(currentInterval[1], intervalToMerge[1])]
+                    haveMergedNewInterval = true;
+                } else if(currentInterval[1] < intervalToMerge[0] &&  (this._currentIntervalSet[cIdx+1] == undefined || intervalToMerge[1] < this._currentIntervalSet[cIdx+1]![0])){
+                    this._currentIntervalSet.splice(cIdx+1,0,intervalToMerge);
+                    break;
+                }
+            } else {
+                // We've merged the previous interval. We need to check to make sure the previous interval does not overlap with the current interval
+                // If it does, we merge and iterate on
+                const previousInterval = this._currentIntervalSet[cIdx-1];
+                if(!previousInterval) throw Error;
+                if(this.inRange(currentInterval[0], previousInterval[0], previousInterval[1]) || this.inRange(currentInterval[1], previousInterval[0], previousInterval[1])){
+                    this._currentIntervalSet[cIdx-1] = [Math.min(currentInterval[0], previousInterval[0]), Math.max(currentInterval[1], previousInterval[1])]
+                    this._currentIntervalSet.splice(cIdx, 1);
+                    continue;
+                } else { break; }
+            }
+            ++cIdx;
+        }
+        this._queuedAddIntervals.shift();
+        if(this._currentIntervalSet.length>0) return this.mergeIntervals();
+        return;
+    }
+
+    // Helper function for determining if a value is within a range
+    private inRange(value: number, min: number, max: number): boolean{
+        if(value >= min && value <= max) return true;
+        return false
     }
 
     // Retrieve an interval from the front of the remove queue
