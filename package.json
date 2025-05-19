@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "test": "node --test",
     "start": "node app.js"
   },
   "dependencies": {

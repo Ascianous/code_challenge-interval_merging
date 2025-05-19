@@ -1,10 +1,8 @@
-"use strict";
 /**
  * Main entry point for the application
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const interval_manager_1 = require("./interval_manager");
-const intervalManager = new interval_manager_1.IntervalManager();
+import { IntervalManager } from "./interval_manager.js";
+const intervalManager = new IntervalManager();
 intervalManager.addInterval([2, 3]);
 console.log(intervalManager.getIntervals());
 intervalManager.addInterval([5, 6]);

@@ -2,7 +2,7 @@
  * Main entry point for the application
  */
 
-import { IntervalManager } from "./interval_manager";
+import { IntervalManager } from "./interval_manager.js";
 
 const intervalManager = new IntervalManager();
 intervalManager.addInterval([2,3]);
