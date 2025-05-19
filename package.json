@@ -16,7 +16,8 @@
     "url": "https://github.com/Ascianous/code_challenge-interval_merging.git"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node app.js"
   },
   "dependencies": {
     "typescript": "5.8.3"
