@@ -23,13 +23,11 @@ export class IntervalManager {
 
     // add the passed interval to the set
     // - run interval validation
-    // - run interval merge
+    // - run add queue
     public addInterval(interval: [number, number]):void{
         if(!this.isIntervalValid(interval)) throw Error;
         this._queuedAddIntervals.push(interval);
-        if(this._queuedAddIntervals.length == 1){
-            this.runAddQueue();
-        }
+        if(this._queuedAddIntervals.length == 1) this.runAddQueue();
         return;
     }
 
@@ -63,6 +61,7 @@ export class IntervalManager {
     // Retrieve an interval from the front of the add queue
     // and merge it with the existing set
     private mergeIntervals(): void{
+        // TODO combine with while loop
         const intervalToMerge: [number, number] | undefined = this._queuedAddIntervals[0];
         if(!intervalToMerge) return;
         
@@ -79,16 +78,19 @@ export class IntervalManager {
         while(cIdx < this._currentIntervalSet.length){
             const currentInterval = this._currentIntervalSet[cIdx];
             if(!currentInterval) throw Error;
+            // TODO refactor - there is code overlap between the if and else bodies. Can we find a way to merge the two sections?
             if(!haveMergedNewInterval){
+                // case 3 - the incoming interval overlaps partially with an existing interval. We need to run a merge and iterate through
                 if(this.inRange(currentInterval[0], intervalToMerge[0], intervalToMerge[1]) || this.inRange(currentInterval[1], intervalToMerge[0], intervalToMerge[1])){
                     this._currentIntervalSet[cIdx] = [Math.min(currentInterval[0], intervalToMerge[0]), Math.max(currentInterval[1], intervalToMerge[1])]
                     haveMergedNewInterval = true;
-                } else if(currentInterval[1] < intervalToMerge[0] &&  (this._currentIntervalSet[cIdx+1] == undefined || intervalToMerge[1] < this._currentIntervalSet[cIdx+1]![0])){
+                } // case 2 - the incoming interval exists between two existing intervals.  We need to insert and then we can break
+                else if(currentInterval[1] < intervalToMerge[0] &&  (this._currentIntervalSet[cIdx+1] == undefined || intervalToMerge[1] < this._currentIntervalSet[cIdx+1]![0])){
                     this._currentIntervalSet.splice(cIdx+1,0,intervalToMerge);
                     break;
                 }
             } else {
-                // We've merged the previous interval. We need to check to make sure the previous interval does not overlap with the current interval
+                // We've merged into the previous interval. We need to check to make sure the newly merged interval does not overlap with the current interval
                 // If it does, we merge and iterate on
                 const previousInterval = this._currentIntervalSet[cIdx-1];
                 if(!previousInterval) throw Error;
