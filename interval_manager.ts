@@ -50,7 +50,7 @@ export class IntervalManager {
         return;
     }
 
-    // Tests for urrent validatity criteria on interval
+    // Tests for validatity criteria on interval
     // - valid integer in each position
     // - integers in ascending order
     private isIntervalValid(interval: [number, number]):boolean{
@@ -98,7 +98,7 @@ export class IntervalManager {
                     this._currentIntervalSet[cIdx-1] = [Math.min(currentInterval[0], previousInterval[0]), Math.max(currentInterval[1], previousInterval[1])]
                     this._currentIntervalSet.splice(cIdx, 1);
                     continue;
-                } else { break; }
+                } else { break; } // As entries are organised in ascending order, so if we've merged our intial target and find no other matches, we are finished
             }
             ++cIdx;
         }
@@ -114,7 +114,24 @@ export class IntervalManager {
     // Retrieve an interval from the front of the remove queue
     // add remove it from the existing set
     private demergeIntervals(){
-
+        // TODO
+        /**
+         * Similar principles apply here to the merge intervals in that
+         * 1) There a several distinct cases, a) exists in space between intervals, b) exists across one interval, c) exists across many intervals
+         * 2) In some cases we will need to iterate through some of if not all of the interval set when running a demerge, and in others we won't.
+         * 
+         * First, determine what kind of demerge we need to do
+         * If the interval to remove exists between two intervals, we don't need to do anything. We can return
+         * 
+         * If the interval to remove is fully contained within one interval, 
+         * we can then split that interval into one or two parts and then nothing further is needed. We can return
+         * edge case here is where the interval to remove fully matches one interval. Here we need to remove that interval from the set entirely and then return.
+         * 
+         * If the interval to remove is partially contained within one interval then
+         *  - remove the part that overlaps from the current interval set
+         *  - iterate to the next interval in the set and see if there is overlap (repeating previous steps)
+         *  - as soon as we no longer find any overlap, we can stop and return
+         */
     }
 
 
